@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工具箱</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --wall-top: #efe9de;
+    --wall-bottom: #d9c9b6;
+    --glass: rgba(255,255,255,0.46);
+    --glass-border: rgba(255,255,255,0.55);
+    --glass-hi: rgba(255,255,255,0.75);
+    --ink: #2a251f;
+    --ink-muted: rgba(42,37,31,0.62);
+    --ink-faint: rgba(42,37,31,0.4);
+    --frame-bg: #050505;
+    --shadow-icon: 0 6px 16px -6px rgba(42,37,31,0.35);
+    --page-bg: #c9bda9;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --wall-top: #14181c;
+      --wall-bottom: #231a17;
+      --glass: rgba(255,255,255,0.10);
+      --glass-border: rgba(255,255,255,0.16);
+      --glass-hi: rgba(255,255,255,0.22);
+      --ink: #f3efe9;
+      --ink-muted: rgba(243,239,233,0.66);
+      --ink-faint: rgba(243,239,233,0.38);
+      --frame-bg: #000000;
+      --shadow-icon: 0 6px 18px -6px rgba(0,0,0,0.6);
+      --page-bg: #0a0c0d;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --wall-top: #14181c;
+    --wall-bottom: #231a17;
+    --glass: rgba(255,255,255,0.10);
+    --glass-border: rgba(255,255,255,0.16);
+    --glass-hi: rgba(255,255,255,0.22);
+    --ink: #f3efe9;
+    --ink-muted: rgba(243,239,233,0.66);
+    --ink-faint: rgba(243,239,233,0.38);
+    --frame-bg: #000000;
+    --shadow-icon: 0 6px 18px -6px rgba(0,0,0,0.6);
+    --page-bg: #0a0c0d;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--page-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 16px;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'PingFang TC', sans-serif;
+  }
+
+  /* iPhone 14 Pro: 393 x 852 logical pt, 19.5:9, Dynamic Island 126x37pt */
+  .device {
+    position: relative;
+    width: 393px;
+    max-width: 100%;
+    aspect-ratio: 393 / 852;
+    border-radius: 55px;
+    background: linear-gradient(175deg, var(--wall-top) 0%, var(--wall-bottom) 100%);
+    box-shadow: 0 0 0 11px var(--frame-bg), 0 30px 60px -20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 37px;
+    background: var(--frame-bg);
+    border-radius: 20px;
+    z-index: 5;
+  }
+
+  .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .statusbar .icons { display: flex; align-items: center; gap: 5px; }
+  .statusbar svg { display: block; }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 20px 0;
+    overflow: hidden;
+  }
+
+  .date-widget {
+    padding: 2px 2px 20px;
+  }
+
+  .date-widget .day {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    margin: 0 0 2px;
+  }
+
+  .date-widget h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .section-label {
+    margin: 0 0 12px 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px 14px;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    color: inherit;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .icon {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 22%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+    box-shadow: var(--shadow-icon);
+    transition: transform 0.15s ease;
+  }
+
+  .app:active .icon { transform: scale(0.92); }
+
+  .icon.tooth {
+    background: linear-gradient(160deg, #4fb3a1 0%, #1f6e5f 100%);
+  }
+
+  .icon.placeholder {
+    background: var(--glass);
+    border: 1.5px dashed var(--glass-border);
+    box-shadow: none;
+    font-size: 20px;
+    color: var(--ink-faint);
+  }
+
+  .app span.label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.25;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .app.is-placeholder span.label {
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  .spacer { flex: 1; min-height: 8px; }
+
+  .hint-row {
+    text-align: center;
+    padding: 4px 12px 14px;
+  }
+
+  .hint-row p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  .home-indicator {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 9px;
+  }
+
+  .home-indicator span {
+    width: 134px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--ink);
+    opacity: 0.55;
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="island"></div>
+
+  <div class="statusbar">
+    <span id="clock">--:--</span>
+    <span class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="7" width="2.6" height="4" rx="0.6" fill="currentColor"/><rect x="4.4" y="5" width="2.6" height="6" rx="0.6" fill="currentColor"/><rect x="8.8" y="3" width="2.6" height="8" rx="0.6" fill="currentColor"/><rect x="13.2" y="0" width="2.6" height="11" rx="0.6" fill="currentColor"/></svg>
+      <svg width="23" height="12" viewBox="0 0 23 12" fill="none"><rect x="0.75" y="0.75" width="19" height="10.5" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="2.3" y="2.3" width="16" height="7.4" rx="1.3" fill="currentColor"/><rect x="21" y="4" width="1.6" height="4" rx="0.8" fill="currentColor"/></svg>
+    </span>
+  </div>
+
+  <div class="content">
+    <div class="date-widget">
+      <p class="day" id="weekday">—</p>
+      <h1 id="fulldate">個人工具箱</h1>
+    </div>
+
+    <p class="section-label">我的工具</p>
+
+    <div class="grid">
+      <a class="app" id="alignerApp" href="#" target="_blank" rel="noopener">
+        <div class="icon tooth">🦷</div>
+        <span class="label">牙套計算器</span>
+      </a>
+
+      <div class="app is-placeholder">
+        <div class="icon placeholder">+</div>
+        <span class="label">更多工具<br>即將加入</span>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="hint-row">
+      <p>共 1 個工具・持續新增中</p>
+    </div>
+  </div>
+
+  <div class="home-indicator"><span></span></div>
+</div>
+
+<script>
+  // 部署到 GitHub Pages 後，工具都放在同一個 repo 裡，用相對路徑連結即可
+  document.getElementById('alignerApp').href = 'tools/aligner-schedule.html';
+
+  function tick() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${hh}:${mm}`;
+
+    const weekdayNames = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    document.getElementById('weekday').textContent = weekdayNames[now.getDay()];
+    document.getElementById('fulldate').textContent = `${now.getMonth()+1}月${now.getDate()}日`;
+  }
+  tick();
+  setInterval(tick, 15000);
+</script>
+</body>
+</html>

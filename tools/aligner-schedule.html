@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>牙套週期計算器</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --surface-sunken: #f2f0e8;
+    --text: #202a27;
+    --text-muted: #5c6b66;
+    --border: #e0ddd0;
+    --border-strong: #c9c5b4;
+    --accent: #2f7d70;
+    --accent-strong: #1f5c52;
+    --accent-soft: #e4f0ec;
+    --accent-soft-border: #cfe4dd;
+    --shadow: 0 1px 2px rgba(32,42,39,0.04), 0 8px 24px -12px rgba(32,42,39,0.12);
+    --focus-ring: 0 0 0 3px rgba(47,125,112,0.28);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a18;
+      --surface: #1b2320;
+      --surface-sunken: #212a26;
+      --text: #eaf0ed;
+      --text-muted: #97a6a0;
+      --border: #2c3733;
+      --border-strong: #3c4a44;
+      --accent: #57b6a4;
+      --accent-strong: #7fcdbd;
+      --accent-soft: #223330;
+      --accent-soft-border: #2d443f;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+      --focus-ring: 0 0 0 3px rgba(87,182,164,0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #141a18;
+    --surface: #1b2320;
+    --surface-sunken: #212a26;
+    --text: #eaf0ed;
+    --text-muted: #97a6a0;
+    --border: #2c3733;
+    --border-strong: #3c4a44;
+    --accent: #57b6a4;
+    --accent-strong: #7fcdbd;
+    --accent-soft: #223330;
+    --accent-soft-border: #2d443f;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    --focus-ring: 0 0 0 3px rgba(87,182,164,0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.55;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(28px, 4.5vw, 38px);
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  form.card {
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 20px;
+  }
+
+  .field-grid .span-2 { grid-column: 1 / -1; }
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 20px;
+  }
+
+  legend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 0 12px;
+  }
+
+  .date-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .aligner-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px dashed var(--border-strong);
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 7px;
+  }
+
+  input {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .error-banner {
+    display: none;
+    margin-top: 20px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: color-mix(in srgb, #c0392b 12%, var(--surface));
+    border: 1px solid color-mix(in srgb, #c0392b 40%, var(--border));
+    color: var(--text);
+    font-size: 13px;
+  }
+  .error-banner.show { display: block; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--accent-strong);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+
+  .stat-value small {
+    font-family: 'Public Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  .schedule-card {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .schedule-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .schedule-head h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .schedule-head span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 10px 24px;
+    background: var(--surface-sunken);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 11px 24px;
+    border-top: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  tbody tr.is-today {
+    background: var(--accent-soft);
+  }
+
+  .aligner-no {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--accent-strong);
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft-border);
+    color: var(--accent-strong);
+    margin-left: 8px;
+  }
+
+  footer {
+    margin-top: 28px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .field-grid, .date-range, .aligner-range, .stat-row { grid-template-columns: 1fr; }
+    thead th, tbody td { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">個人牙套配戴時程</p>
+    <h1>牙套週期計算器</h1>
+    <p>輸入牙套起訖日期與副數範圍，平均分配每副的配戴天數，並列出每一副的配戴區間與更換日期。</p>
+  </header>
+
+  <form class="card" id="form">
+    <fieldset>
+      <div>
+        <legend>配戴期間</legend>
+        <div class="date-range">
+          <div>
+            <label for="startDate">牙套起始日</label>
+            <input type="date" id="startDate" required>
+          </div>
+          <div>
+            <label for="endDate">牙套結束日</label>
+            <input type="date" id="endDate" required>
+          </div>
+        </div>
+      </div>
+      <div class="aligner-range">
+        <div>
+          <label for="startNo">起始副數（第 n 副）</label>
+          <input type="number" id="startNo" min="1" step="1" required>
+        </div>
+        <div>
+          <label for="endNo">結束副數（第 m 副）</label>
+          <input type="number" id="endNo" min="1" step="1" required>
+        </div>
+      </div>
+    </fieldset>
+    <p class="error-banner" id="errorBanner"></p>
+  </form>
+
+  <div class="stat-row">
+    <div class="stat">
+      <p class="stat-label">總配戴天數</p>
+      <p class="stat-value" id="statDays">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">牙套副數</p>
+      <p class="stat-value" id="statCount">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">平均每副天數</p>
+      <p class="stat-value" id="statAvg">—</p>
+    </div>
+  </div>
+
+  <div class="card schedule-card">
+    <div class="schedule-head">
+      <h2>配戴時程表</h2>
+      <span id="scheduleMeta"></span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>牙套</th>
+            <th>開始配戴</th>
+            <th>結束配戴</th>
+            <th>天數</th>
+            <th>更換日期</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>更換日期為結束配戴隔天，即開始配戴下一副的日子。天數以整數天分配，餘數平均加在最前面幾副。</footer>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const MS_DAY = 86400000;
+
+  const fmtDate = (d) => `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  const fmtWeekday = (d) => ['日','一','二','三','四','五','六'][d.getDay()];
+  const parseDate = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+  const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+
+  function showError(msg) {
+    const el = $('errorBanner');
+    if (!msg) { el.classList.remove('show'); el.textContent = ''; return; }
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function compute() {
+    const startDate = $('startDate').value ? parseDate($('startDate').value) : null;
+    const endDate = $('endDate').value ? parseDate($('endDate').value) : null;
+    const startNo = parseInt($('startNo').value, 10);
+    const endNo = parseInt($('endNo').value, 10);
+
+    $('scheduleBody').innerHTML = '';
+    $('statDays').innerHTML = '—';
+    $('statCount').innerHTML = '—';
+    $('statAvg').innerHTML = '—';
+    $('scheduleMeta').textContent = '';
+
+    if (!startDate || !endDate) { showError(''); return; }
+    if (endDate < startDate) { showError('牙套結束日不能早於起始日。'); return; }
+    if (!Number.isFinite(startNo) || !Number.isFinite(endNo) || startNo < 1 || endNo < 1) {
+      showError('請輸入有效的牙套副數。'); return;
+    }
+    if (endNo < startNo) { showError('結束副數不能小於起始副數。'); return; }
+
+    showError('');
+
+    const totalAligners = endNo - startNo + 1;
+    const totalDays = Math.round((endDate - startDate) / MS_DAY) + 1;
+
+    if (totalDays < totalAligners) {
+      showError(`配戴總天數（${totalDays} 天）少於牙套副數（${totalAligners} 副），至少每副需要 1 天。`);
+      return;
+    }
+
+    const base = Math.floor(totalDays / totalAligners);
+    const remainder = totalDays % totalAligners;
+    const avgExact = totalDays / totalAligners;
+
+    $('statDays').innerHTML = `${totalDays}<small>天</small>`;
+    $('statCount').innerHTML = `${totalAligners}<small>副</small>`;
+    $('statAvg').innerHTML = `${avgExact.toFixed(1)}<small>天/副</small>`;
+    $('scheduleMeta').textContent = `第 ${startNo} 副 → 第 ${endNo} 副`;
+
+    const today = new Date();
+    let cursor = startDate;
+    const rows = [];
+    for (let i = 0; i < totalAligners; i++) {
+      const days = base + (i < remainder ? 1 : 0);
+      const wearStart = cursor;
+      const wearEnd = addDays(cursor, days - 1);
+      const changeDate = addDays(wearEnd, 1);
+      const alignerNo = startNo + i;
+      const isLast = i === totalAligners - 1;
+
+      const isTodayRow = today >= wearStart && today <= wearEnd;
+
+      rows.push(`
+        <tr class="${isTodayRow ? 'is-today' : ''}">
+          <td><span class="aligner-no">第 ${alignerNo} 副</span>${isTodayRow ? '<span class="badge">配戴中</span>' : ''}</td>
+          <td>${fmtDate(wearStart)}（${fmtWeekday(wearStart)}）</td>
+          <td>${fmtDate(wearEnd)}（${fmtWeekday(wearEnd)}）</td>
+          <td>${days} 天</td>
+          <td>${isLast ? '完成療程' : `${fmtDate(changeDate)}（${fmtWeekday(changeDate)}）`}</td>
+        </tr>
+      `);
+      cursor = changeDate;
+    }
+    $('scheduleBody').innerHTML = rows.join('');
+  }
+
+  ['startDate','endDate','startNo','endNo'].forEach(id => {
+    $(id).addEventListener('input', compute);
+  });
+
+  // 預填範例數值，方便一開始就能看到完整效果，可直接覆寫成你自己的資料
+  const today = new Date();
+  $('startDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const end = addDays(today, 89);
+  $('endDate').value = `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+  $('startNo').value = 1;
+  $('endNo').value = 12;
+  compute();
+</script>
+</body>
+</html>
